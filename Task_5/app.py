@@ -7,16 +7,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
-# =========================
-# LOAD DATA
-# =========================
+
 movies = pd.read_csv("movies.csv")
 movies = movies[['title','overview','genres','vote_average']]
 movies.dropna(inplace=True)
 
-# =========================
-# PROCESS GENRES
-# =========================
+
 def convert(text):
     L = []
     for i in ast.literal_eval(text):
@@ -25,26 +21,20 @@ def convert(text):
 
 movies['genres'] = movies['genres'].apply(convert)
 
-# =========================
-# FEATURE ENGINEERING
-# =========================
+
 movies['overview'] = movies['overview'].apply(lambda x: x.split())
 movies['genres_clean'] = movies['genres'].apply(lambda x: [i.replace(" ","") for i in x])
 
 movies['tags'] = movies['overview'] + movies['genres_clean']
 movies['tags'] = movies['tags'].apply(lambda x: " ".join(x).lower())
 
-# =========================
-# VECTORIZATION
-# =========================
+
 cv = CountVectorizer(max_features=3000, stop_words='english')
 vectors = cv.fit_transform(movies['tags']).toarray()
 
 similarity = cosine_similarity(vectors)
 
-# =========================
-# OTT PLATFORM MAP
-# =========================
+
 platform_map = {
     "Netflix": "https://www.netflix.com",
     "Amazon Prime": "https://www.primevideo.com",
@@ -52,14 +42,10 @@ platform_map = {
     "Zee5": "https://www.zee5.com"
 }
 
-# =========================
-# GET ALL GENRES
-# =========================
+
 all_genres = sorted(list({g for sub in movies['genres'] for g in sub}))
 
-# =========================
-# RECOMMENDATION
-# =========================
+
 def recommend_movies(genre, min_rating):
     filtered = movies[
         (movies['genres'].apply(lambda x: genre in x)) &
@@ -95,9 +81,7 @@ def recommend_movies(genre, min_rating):
 
     return result
 
-# =========================
-# ROUTES
-# =========================
+
 @app.route('/')
 def home():
     return render_template('front.html')
@@ -114,8 +98,6 @@ def recommend():
 
     return jsonify(recommend_movies(genre, rating))
 
-# =========================
-# RUN
-# =========================
+
 if __name__ == "__main__":
     app.run(debug=True)
