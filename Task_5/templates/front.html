@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Movie Recommender</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #000;
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        h1::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: white;
+            margin: 10px auto;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+
+        /* FORM */
+        .form-box {
+            background: #111;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            border: 1px solid #222;
+        }
+
+        select, input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #000;
+            color: #fff;
+            outline: none;
+        }
+
+        button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ccc;
+        }
+
+        /* GRID */
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        /* CARD */
+        .card {
+            background: #111;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid #222;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border: 1px solid #555;
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+            background: #222;
+        }
+
+        .card h3 {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .rating {
+            margin: 6px 0;
+        }
+
+        /* PLATFORM BUTTONS */
+        .platform-btn {
+            display: inline-block;
+            background: #000;
+            border: 1px solid #333;
+            padding: 5px 8px;
+            margin: 3px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #fff;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .platform-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .no-result {
+            text-align: center;
+            margin-top: 20px;
+            color: #aaa;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<h1>🎬 Smart Movie Recommender</h1>
+
+<div class="container">
+
+    <!-- FILTER BOX -->
+    <div class="form-box">
+        <select id="genre"></select>
+        <input type="number" id="rating" value="7" step="0.1" placeholder="Min Rating">
+        <button onclick="getRec()">🔍 Recommend</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results" id="result"></div>
+
+</div>
+
+<script>
+/* LOAD GENRES */
+fetch('/genres')
+.then(res => res.json())
+.then(data => {
+    let dropdown = document.getElementById("genre");
+    data.forEach(g => {
+        let opt = document.createElement("option");
+        opt.value = g;
+        opt.text = g;
+        dropdown.appendChild(opt);
+    });
+});
+
+/* GET RECOMMENDATIONS */
+function getRec(){
+    let genre = document.getElementById("genre").value;
+    let rating = document.getElementById("rating").value;
+
+    fetch('/recommend',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ genre, rating })
+    })
+    .then(res => res.json())
+    .then(data => {
+        let result = document.getElementById("result");
+        result.innerHTML = "";
+
+        if(data.length === 0){
+            result.innerHTML = "<p class='no-result'>No movies found 😢</p>";
+            return;
+        }
+
+        data.forEach(m => {
+
+            let platformsHTML = "";
+            m.platforms.forEach(p => {
+                platformsHTML += `
+                    <a href="${p.link}" target="_blank" class="platform-btn">
+                        ${p.name}
+                    </a>
+                `;
+            });
+
+            let card = document.createElement("div");
+            card.className = "card";
+
+            card.innerHTML = `
+                <img src="${m.poster}">
+                <h3>${m.title}</h3>
+                <p class="rating">⭐ ${m.rating}</p>
+                <div>
+                    <p>📺 Available on:</p>
+                    ${platformsHTML}
+                </div>
+            `;
+
+            result.appendChild(card);
+        });
+    });
+}
+</script>
+
+</body>
+</html>
