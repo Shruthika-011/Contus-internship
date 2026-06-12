@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Churn Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="card">
+    <h1>📊 Customer Churn Prediction</h1>
+
+    <form action="/predict" method="post">
+
+        <div class="grid">
+            
+            <div>
+                <label>Gender</label>
+                <select name="gender">
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Senior Citizen</label>
+                <select name="senior">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Partner</label>
+                <select name="partner">
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Dependents</label>
+                <select name="dependents">
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Tenure (months)</label>
+                <input type="number" name="tenure" required>
+            </div>
+
+            <div>
+                <label>Phone Service</label>
+                <select name="phone">
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Internet Service</label>
+                <select name="internet">
+                    <option>DSL</option>
+                    <option>Fiber optic</option>
+                    <option>No</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Monthly Charges</label>
+                <input type="number" step="any" name="monthly" required>
+            </div>
+
+            <div>
+                <label>Total Charges</label>
+                <input type="number" step="any" name="total" required>
+            </div>
+
+        </div>
+
+        <button type="submit">🔍 Predict</button>
+
+    </form>
+
+    {% if prediction %}
+        <div class="result">
+            {{ prediction }}
+        </div>
+    {% endif %}
+</div>
+
+{% if prob %}
+<div class="bar">
+    <div class="fill" style="width: {{ prob }}%"></div>
+</div>
+<p>{{ prob }}% churn probability</p>
+{% endif %}
+
+</body>
+</html>
